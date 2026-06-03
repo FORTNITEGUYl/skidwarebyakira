@@ -1,12 +1,15 @@
-local _args = ...
-local _isPaidUser = type(_args) == 'table' and _args.Username and _args.Password
-getgenv().AeroLocalPaid = _isPaidUser and true or false
+_args = ...
+
+-- Whitelist removed: everyone is treated as paid
+getgenv().AeroLocalPaid = true
+
 local isfile = isfile or function(file)
 	local suc, res = pcall(function()
 		return readfile(file)
 	end)
 	return suc and res ~= nil and res ~= ''
 end
+
 local delfile = delfile or function(file)
 	writefile(file, '')
 end
@@ -14,7 +17,7 @@ end
 local function downloadFile(path, func)
 	if not isfile(path) then
 		local suc, res = pcall(function()
-			return game:HttpGet('https://raw.githubusercontent.com/poopparty/poopparty/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true)
+			return game:HttpGet('https://raw.githubusercontent.com/FORTNITEGUYl/remake/'..readfile('newvape/profiles/commit.txt')..'/'..select(1, path:gsub('newvape/', '')), true)
 		end)
 		if not suc or res == '404: Not Found' then
 			error(res)
@@ -44,32 +47,32 @@ for _, folder in {'newvape', 'newvape/games', 'newvape/profiles', 'newvape/asset
 end
 
 local function downloadPremadeProfiles(commit)
-    local httpService = game:GetService('HttpService')
-    
-    if isfolder('newvape/profiles/premade') then
-        for _, file in listfiles('newvape/profiles/premade') do
-            pcall(function()
-                if isfile(file) then
-                    delfile(file)
-                end
-            end)
-        end
-    else
-        makefolder('newvape/profiles/premade')
-    end
+	local httpService = game:GetService('HttpService')
 
-    local success, response = pcall(function()
-        return game:HttpGet('https://api.github.com/repos/poopparty/poopparty/contents/profiles/premade?ref=' .. commit)
-    end)
+	if isfolder('newvape/profiles/premade') then
+		for _, file in listfiles('newvape/profiles/premade') do
+			pcall(function()
+				if isfile(file) then
+					delfile(file)
+				end
+			end)
+		end
+	else
+		makefolder('newvape/profiles/premade')
+	end
 
-    if success and response then
-        local ok, files = pcall(function()
-            return httpService:JSONDecode(response)
-        end)
+	local success, response = pcall(function()
+		return game:HttpGet('https://api.github.com/repos/FORTNITEGUYl/remake/contents/profiles/premade?ref=' .. commit)
+	end)
 
-        if ok and type(files) == 'table' then
-            for _, file in pairs(files) do
-                if file.name and file.name:find('.txt') and file.name ~= 'commit.txt' then
+	if success and response then
+		local ok, files = pcall(function()
+			return httpService:JSONDecode(response)
+		end)
+
+		if ok and type(files) == 'table' then
+			for _, file in pairs(files) do
+				if file.name and file.name:find('.txt') and file.name ~= 'commit.txt' then
 					local baseName = (file.name:match('^(.-)%.txt$') or file.name):gsub('%d+$', '')
 					local fileId = (game.GameId == 2619619496) and game.GameId or game.PlaceId
 					local filePath = 'newvape/profiles/premade/' .. baseName .. tostring(fileId) .. '.txt'
@@ -79,20 +82,20 @@ local function downloadPremadeProfiles(commit)
 					if ds and dc and dc ~= '404: Not Found' then
 						writefile(filePath, dc)
 					end
-                end
-            end
-        end
-    end
+				end
+			end
+		end
+	end
 end
 
 if not shared.VapeDeveloper then
 	local _, subbed = pcall(function()
-		return game:HttpGet('https://github.com/poopparty/poopparty')
+		return game:HttpGet('https://github.com/FORTNITEGUYl/remake')
 	end)
 
 	local commit = 'main'
 	local ok, res = pcall(function()
-		return game:HttpGet('https://api.github.com/repos/poopparty/poopparty/commits/main', true)
+		return game:HttpGet('https://api.github.com/repos/FORTNITEGUYl/remake/commits/main', true)
 	end)
 
 	if ok and res then
@@ -127,7 +130,7 @@ if not shared.VapeDeveloper then
 	pcall(downloadPremadeProfiles, commit)
 end
 
+-- Whitelist removed: no password needed
 return loadstring(downloadFile('newvape/main.lua'), 'main')({
-    Username = shared.ValidatedUsername,
-    Password = _args and _args.Password or nil
+	Username = shared.ValidatedUsername
 })
